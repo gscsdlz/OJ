@@ -116,7 +116,7 @@ class AdminDataController
     private static function open_dir($path)
     {
         if(!file_exists($path)) {
-            mkdir($path, '0777', true);
+            system("mkdir -p ".$path);
         }
         return opendir($path);
     }
