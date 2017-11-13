@@ -65,11 +65,15 @@
 <div class="panel-footer text-right">
     <form class="form-horizontal">
         <div class="form-group">
-            <div class="col-sm-10">
+            <div class="col-sm-8">
                 <input type="text" class="form-control" value=""  placeholder="请输入相关内容并回复！">
             </div>
-            <div class="col-sm-2">
+            <div class="col-sm-4">
+
                 <button class="btn btn-primary" type="button" onclick="do_reply($(this))">添加回复</button>
+                @if(Session::has('user_id') && Session::get('privilege') == 1)
+                    <button class="btn btn-danger" type="button" onclick="do_del({{ $q->question_id }}, true, $(this))">删除整个问题</button>
+                @endif
             </div>
         </div>
     </form>
@@ -99,9 +103,16 @@ var token = "{{ csrf_token() }}";
             target.html("");
             var str = '<ul class="list-group">'
             for(var  i = 0; i < data['res'].length; ++i) {
-                str += '<li class="list-group-item"><ol class="breadcrumb"><li><a href="#"><img src="{{ URL('image/header') }}/'+data['res'][i]['headerpath']+'" width="20px" /></a></li> <li><a href="#">'+data['res'][i]['username']+'</a></li> <li class="active">'+data['res'][i]['reply_time']+'</li></ol>'+data['res'][i]['topic_answer']+'</li>'
+                str += '<li class="list-group-item">' +
+                    '<ol class="breadcrumb"><li><a href="#"><img src="{{ URL('image/header') }}/'+data['res'][i]['headerpath']+'" width="20px" /></a></li> <li><a href="#">'+data['res'][i]['username']+'</a></li> <li class="active">'+data['res'][i]['reply_time']+'</li>' +
+                    @if(Session::has('user_id') && Session::get('privilege') == 1)
+                        '<img onclick="do_del('+data['res'][i]['answer_id']+', false, $(this))" src="{{ URL('image/wa.png') }}" width="15px" style="float:right" />'+
+                    @endif
+                    '</ol>'+data['res'][i]['topic_answer']+'</li>'
+
             }
             str += '</ul>';
+
             target.append(str);
         })
     })
@@ -133,5 +144,21 @@ var token = "{{ csrf_token() }}";
             })
         }
     }
+
+    @if(Session::has('user_id') && Session::get('privilege') == 1)
+        function do_del(id, all, target) {
+            $.post("{{ URL("contest/del_answer") }}", {id:id, _token:token, all:all}, function(data){
+                if(data.status == false)
+                    alert("删除失败！");
+                else {
+                    if (all == false) {//del answer
+                        $(target).parent().parent().parent().remove();
+                    } else {
+                        $(target).parent().parent().parent().parent().parent().remove();
+                    }
+                }
+            })
+        }
+    @endif
 </script>
 @endsection

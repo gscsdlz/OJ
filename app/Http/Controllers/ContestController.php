@@ -139,6 +139,23 @@ class ContestController extends Controller
         
     }
 
+    public function del_answer(Request $request)
+    {
+        $id = $request->get('id');
+        $flag = $request->get('all');
+
+        if(Session::has('user_id') && Session::get('privilege') == 1) {
+            if($flag == false) {
+                AnswerModel::where('answer_id', $id)->delete();
+            } else {
+                AnswerModel::where('question_id', $id)->delete();
+                QuestionModel::where('question_id', $id)->delete();
+            }
+            return response()->json(['status' => true]);
+        }
+        return response()->json(['status' => false]);
+    }
+
     private function get_all_status($cid, &$cranks)
     {
         $pros = ContestProblemModel::select('inner_id', 'pro_id')->where('contest_id', $cid)->get()->toArray();
