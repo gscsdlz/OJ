@@ -116,7 +116,7 @@ class CodeController extends Controller
            DB::table('codes')->insert(['code' => $code]);
            DB::table('status')->insert([]);
         });*/
-        Session::put('lang', $lang);
+        Session::set('lang', $lang);
         DB::beginTransaction();
         $sid1 = DB::table('codes')->insertGetId(['code' => $code]);
         $sid2 = DB::table('status')->insertGetId([
