@@ -114,7 +114,16 @@
     <hr/>
     @if(isset($pid) && $pid > 0)
     <div class="row">
-        <div class="col-md-6 col-md-offset-3">
+        <div class="col-md-3">
+            <ul class="text-danger">
+                <li>文件上传界面仅在题目编辑界面出现</li>
+                <li>上传的文件必须匹配，即同名.in和.out文件</li>
+                <li>如果选择了批量上传，仅支持.zip格式，并且对压缩包内容有要求，不能出现目录，本地打开压缩包以后必须立即出现文件，而不是任何目录</li>
+                <li>删除文件仅仅作软删除，可以点击恢复，删除文件相当于移动文件，移动至tmp的文件定期清理。</li>
+                <li>文件上传有大小限制，目前服务器配置为4MB</li>
+            </ul>
+        </div>
+        <div class="col-md-6">
             <div class="panel panel-success">
                 <div class="panel-heading">
                     输入输出文件列表
