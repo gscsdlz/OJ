@@ -18,7 +18,6 @@
 <body style="background-color:rgb(248,248,248)">	<!--禁止横向滑动-->
 <hr/>
 <hr/>
-<h4 class="text-danger">重现赛前十名还有奖品，后边其他同学也会有随机奖，奖品都为T恤</h4>
 @if(isset($cid) && $cid != 0)
     @include('contest_navbar')
 @else
