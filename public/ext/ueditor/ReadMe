@@ -1,0 +1,14 @@
+为了解决在apache启用了模块重写，导致现在/OJ  代表的是/laravel/public
+ueditor上传的时候 以public下的image目录为准，但是返回的URL并不会有/OJ/前缀
+另外创建目录时 会以/var/www/html为准
+所以修改如下
+修改Uploader.class.php@331
+
+    $rootPath = $_SERVER['DOCUMENT_ROOT'];
+
+    $rootPath = $_SERVER['DOCUMENT_ROOT'].'/laravel/public';
+
+修改Uploader.class.php@367
+    "url" => $this->fullName,
+
+    "url" => '/OJ'.$this->fullName,
