@@ -78,11 +78,11 @@ class AdminDataController
     public static function upload_files($id, $name)
     {
         //.in .out不需要做任何处理
-        if(strpos('.in', $name) !== false || strpos('.out', $name) !== false) {
+        if(strpos($name, '.in') !== false || strpos($name,'.out') !== false) {
             return true;
         }
         $path = self::$rootPath.'/'.$id;
-        if(file_exists($path) && strpos('.zip', $name) !== false) {
+        if(file_exists($path) && strpos($name,'.zip') !== false) {
             chdir($path);
             system('unzip -q '.$name);
             system('mv '.$name.' /tmp');
