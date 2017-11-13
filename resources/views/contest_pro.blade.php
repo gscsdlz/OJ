@@ -140,7 +140,11 @@
                             <select class="form-control" id="lang">
                                 {{--*/ $langArr = config('web.langArr') /*--}}
                                 @for($i = 0; $i < count($langArr); $i++)
-                                    <option value="{{ $i }}">{{ $langArr[$i] }}</option>
+                                    @if(Session::has('lang') && Session::get('lang') == $i)
+                                        <option value="{{ $i }}" selected>{{ $langArr[$i] }}</option>
+                                    @else
+                                        <option value="{{ $i }}">{{ $langArr[$i] }}</option>
+                                    @endif
                                 @endfor
                             </select>
                         </div>
