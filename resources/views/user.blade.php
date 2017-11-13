@@ -307,9 +307,8 @@
 <script>
     $(document).ready(function(){
         @if(Session::has('username') && Session::get('username') == $userInfo->username)
-            $.post("/user/get_ip_addr", {uid:{{ Session::get('user_id') }},ip_addr:"{{ $userInfo->lastip }}"}, function(data){
-                var arr = eval("(" + data + ")");
-                $("#lastaddr").html(arr['info']);
+            $.post("{{ URL('user/get_ip_addr') }}", {_token:"{{ csrf_token() }}",ip_addr:"{{ $userInfo->lastip }}"}, function(data){
+                $("#lastaddr").html(data['addr']);
             })
 
 

@@ -36,6 +36,8 @@ class UserController extends Controller
                 Session::put('username', $res->username);
                 Session::put('privilege', $res->privilege);
                 Session::put('user_id', $res->user_id);
+
+                UserModel::where('user_id', $res->user_id)->update(['lasttime' => time(), 'lastip' => $request->server('HTTP_X_REAL_IP')]);
                 return response()->json([
                     'status' => true
                 ]);
@@ -239,6 +241,27 @@ class UserController extends Controller
                 ]);
             }
         }
+
+    }
+
+    public function ip_addr_map(Request $request)
+    {
+        $ip = $request->get('ip_addr');
+
+        $ch = curl_init ();
+        curl_setopt ( $ch, CURLOPT_URL, "http://ip.chinaz.com/" . $ip );
+        curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
+        $output = curl_exec ( $ch );
+        curl_close ( $ch );
+        $location = strrpos ( $output, "Whwtdhalf w50-0" );
+        $i = 0;
+        for($i = $location; $i < $location + 100; $i ++) {
+            if ($output [$i] == '<')
+                break;
+        }
+        $addr = substr ( $output, $location + 17, $i - ($location + 17) );
+
+        return response()->json(['addr' => $addr]);
 
     }
 }
