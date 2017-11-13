@@ -214,7 +214,13 @@
         $("#uploadFile").AjaxFileUpload({
             action: "{{ URL('admin/file/upload/'.$pid.'?_token='.csrf_token()) }}",
             onComplete: function(filename, response) {
-              //  window.location.reload();
+                var str = response.replace(/<pre>/, '');
+                str = str.replace(/<\/pre>/, '');
+                response = eval("("+str+")");
+                if(response.status == true)
+                    window.location.reload();
+                else
+                    alert("上传失败，请重试");
             }
         })
         @endif

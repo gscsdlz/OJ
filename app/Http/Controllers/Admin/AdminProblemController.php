@@ -218,8 +218,11 @@ class AdminProblemController extends Controller
             $allows = ['application/zip', 'text/plain'];
             $extension = $uf->getMimeType();
             if(in_array($extension, $allows)) {
-                $uf->move('/home/judge/data/'.$pid, $uf->getClientOriginlName());
-
+                $uf->move('/home/judge/data/'.$pid, $uf->getClientOriginalName());
+                $res = AdminDataController::upload_files($pid, $uf->getClientOriginalName());
+                if($res == true) {
+                    return response()->json(['status' => true]);
+                }
             }
         }
         return response()->json(['status' => false]);
