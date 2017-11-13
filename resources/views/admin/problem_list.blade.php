@@ -83,7 +83,7 @@
         $("td img").hide();
 
         $(".visible").click(function(){
-            var id = $(this).parent().parent().children().eq(0).html();
+            var id = $(this).parent().parent().children().eq(0).children().eq(0).html();
 
             var visible = $(this).parent().prev().children().eq(0).val() == 0 ? 1 : 0;
 
