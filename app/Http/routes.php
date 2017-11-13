@@ -41,7 +41,7 @@ Route::group(['middleware' => ['web'], 'prefix' => 'OJ'], function () {
     Route::post('user/login', 'UserController@login');
     Route::post('user/logout', 'UserController@logout');
     Route::post('user/register', 'UserController@register');
-
+    Route::post('user/get_ip_addr', 'UserController@ip_addr_map');
     Route::any('rank/nearby/{username}', 'RankController@nearByUser');
 
     Route::get("rank/show/{page?}", 'RankController@show');
@@ -57,6 +57,7 @@ Route::group(['middleware' => ['web'], 'prefix' => 'OJ'], function () {
     Route::get('/contest/ask/{cid}', 'ContestController@ask_show')->where(['cid' => '[0-9]+']);
     Route::post('contest/add_question', 'ContestController@add_question');
     Route::post('contest/add_answer', 'ContestController@add_answer');
+    Route::post('contest/del_answer', 'ContestController@del_answer');
 
     Route::post('submit', 'CodeController@submit');
     Route::post('contest/get_URG_info', 'ContestController@get_URG_info')->where(['cid' => '[0-9]+']);
