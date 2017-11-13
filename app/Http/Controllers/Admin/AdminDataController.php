@@ -71,11 +71,24 @@ class AdminDataController
 
     /**
      * @param $id
+     * @param $name
      * 批量上传支持，用户上传zip 服务端自解压即可。
+     * @return mixed
      */
-    public static function upload_files($id)
+    public static function upload_files($id, $name)
     {
-
+        //.in .out不需要做任何处理
+        if(strpos('.in', $name) !== false || strpos('.out', $name) !== false) {
+            return true;
+        }
+        $path = self::$rootPath.'/'.$id;
+        if(file_exists($path) && strpos('.zip', $name) !== false) {
+            chdir($path);
+            system('unzip -q '.$name);
+            system('mv '.$name.' /tmp');
+            return true;
+        }
+        return false;
     }
 
     /**
