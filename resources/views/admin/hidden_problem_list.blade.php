@@ -21,7 +21,7 @@
                         <td><input type="hidden" value="{{ $pro->visible }}" />@if($pro->visible == 0) <span class="label label-danger">不可见</span> @else 可见 @endif</td>
                         <td>
                             <img class="visible" src="{{ URL('image/hide.png') }}" width="20px" style="cursor: pointer"/>&nbsp;&nbsp;&nbsp;&nbsp;
-                            <img onclick="window.location.href='{{ URL('admin/problem/edit/'.$pro->pro_id) }}'" src="{{ URL('image/edit.png') }}" width="20px" style="cursor:pointer;"/>&nbsp;&nbsp;&nbsp;&nbsp;
+                            <img onclick="window.location.href='{{ URL('admin/problem/add/'.$pro->pro_id) }}'" src="{{ URL('image/edit.png') }}" width="20px" style="cursor:pointer;"/>&nbsp;&nbsp;&nbsp;&nbsp;
                             <img class="trash" src="{{ URL('image/trash.png') }}" width="20px" style="cursor: pointer"/>&nbsp;&nbsp;&nbsp;&nbsp;
                         </td>
                     </tr>
