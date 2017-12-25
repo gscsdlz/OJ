@@ -18,9 +18,9 @@ class ContestController extends Controller
     public function list_all(Request $request, $old = false)
     {
         if($old == true)
-            $contest_list = ContestModel::get();
+            $contest_list = ContestModel::orderBy('c_stime', 'DESC')->get();
         else
-            $contest_list = ContestModel::where('c_etime', '>=', time())->get();
+            $contest_list = ContestModel::orderBy('c_stime', 'DESC')->where('c_etime', '>=', time())->get();
         return view('contest_list', [
             'menu' => 'contest@list',
             'lists' => $contest_list,
