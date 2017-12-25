@@ -44,4 +44,5 @@ return [
     'RankPageMax' => '50',
     'ProblemPageMax' => '100',
     'StatusPageMax' =>' 20',
+    'vcode' => false,
 ];

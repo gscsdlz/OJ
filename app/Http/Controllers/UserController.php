@@ -15,6 +15,8 @@ use App\Model\TeamModel;
 use App\Model\UserModel;
 use App\Model\VCodeModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 
@@ -25,11 +27,13 @@ class UserController extends Controller
         $username = $request->get('username');
         $password = $request->get('password');
         $vcode = $request->get('vcode');
+
+
         if(strlen($username) == 0 || strlen($password) == 0)
             return response()->json([
                 'status' => false
             ]);
-        if($vcode == Session::get('vcode')) {
+        if($vcode == Session::get('vcode') || config('web.vcode') == false) {
             $res = UserModel::select('password', 'username', 'privilege', 'user_id')->where('username', $username)->first();
 
             if (!is_null($res) && sha1($password) == $res->password && $res->username == $username) {
@@ -53,6 +57,46 @@ class UserController extends Controller
             ]);
         }
     }
+
+    public function findPass(Request $request)
+    {
+        $username = $request->get('username');
+        $user = UserModel::select('email')->where('username', $username)->first();
+        if(is_null($user) || is_null($user->email) || strlen($user->email) < 5 ) {
+            return response()->json(['status' => false]);
+        } else {
+            $email = $user->email;
+            $token = md5($username.rand(0, 1000));
+            $url = URL('user/resetPass?token=').$token;
+            Redis::set('findPassToken:'.$token, $username);
+            Redis::expire('findPassToken:'.$token, 5 * 60);
+
+            Mail::send('mail.findPass' ,['url' => $url, 'username' => $username, 'ua' => $request->server('HTTP_USER_AGENT'), 'ip' => $request->server('HTTP_X_REAL_IP')] , function ($message) use ($email) {
+                $to = $email;
+                $message->to($to)->subject("中北大学Online Judge免密登录邮件");
+            });
+            if(empty(Mail::failures()))
+                return response()->json(['status' => true, 'info' => $email[0].'******'.substr($email, strpos($email, '@'))]);
+            else
+                return response()->json(['status' => false]);
+        }
+    }
+
+    public function resetPass(Request $request)
+    {
+        $token = $request->get('token');
+        $username = Redis::get('findPassToken:'.$token);
+
+        if(!is_null($username)) {
+            $res = UserModel::select('username', 'privilege', 'user_id')->where('username', $username)->first();
+            Session::put('username', $res->username);
+            Session::put('privilege', $res->privilege);
+            Session::put('user_id', $res->user_id);
+            Redis::del('findPassToken:'.$token);
+        }
+        return view('resetPass');
+    }
+
 
     public function show(Request $request, $username)
     {
@@ -192,7 +236,9 @@ class UserController extends Controller
                 $path = $request->file->path();
                 $nname = $uid.time().'.'.$extension;
                 $status = move_uploaded_file($path, './image/header/'.$nname);
-                unlink('./image/header/'.$user->headerpath);
+                if(strpos($user->headerpath, 'default') === false) {
+                    unlink('./image/header/' . $user->headerpath);
+                }
                 UserModel::where('user_id', $uid)->update(['headerPath' => $nname]);
                 if($status == true)
                     return response()->json(['status' => true]);
@@ -205,42 +251,82 @@ class UserController extends Controller
 
     public function register(Request $request)
     {
-        $username = $request->get('newUsername');
-        $password = $request->get('newPassword');
-        $password2 = $request->get('newPassword2');
-        $nickname = $request->get('newNickname');
+        $username = $request->get('username');
+        $password = $request->get('password');
+        $nickname = $request->get('nickname');
         $email = $request->get('email');
 
-        if(is_null($username) || is_null($email) || is_null($password) || $password != $password2) {
+        if(is_null($username) || is_null($email) || is_null($password)) {
             return response()->json(['status' => false]);
         } else {
+            if(preg_match('/^[A-Za-z0-9_]+$/', $username) == 0)
+                return response()->json(['status' => false, 'info' => '用户名不符合规则']);
+
             $c1 = UserModel::where('username', $username)->count();
             if($c1 != 0) {
                 return response()->json([
-                    'status' => 'username error',
+                    'status' => false,
+                    'info' => '用户名重复',
                 ]);
             }
+
             $c2 = UserModel::where('email', $email)->count();
             if($c2 != 0)
                 return response()->json([
-                    'status' => 'email error',
+                    'status' => false,
+                    'info' => '邮箱重复',
                 ]);
 
-            $id = DB::table('users')->insertgetId([
-                'username' => $username,
-                'nickname' => $nickname,
-                'password' => sha1($password),
-                'email' => $email,
-            ]);
-            if($id > 0) {
-                Session::put('username', $username);
-                Session::put('privilege', -1);
-                Session::put('user_id', $id);
+            $token = md5(time() . rand(10000, 99999));
+            $url = URL('activate?token=').$token;
+
+            Mail::send('mail.register' ,['username' => $username, 'url' => $url] , function ($message) use ($email) {
+                $to = $email;
+                $message->to($to)->subject("中北大学Online Judge注册激活邮件");
+            });
+
+            if(empty(Mail::failures())) {
+                Redis::set('regToken:'.$token, json_encode([
+                    'username' => $username,
+                    'nickname' => $nickname,
+                    'password' => $password,
+                    'email' => $email,
+                ]));
+                Redis::expire('regToken:'.$token, 5 * 60);
                 return response()->json([
                     'status' => true
                 ]);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'info' => '发送失败！'
+                ]);
             }
         }
+    }
+
+    public function do_register(Request $request)
+    {
+        $token = $request->get('token');
+        $user = Redis::get('regToken:'.$token);
+        if(!is_null($user)) {
+            $info = json_decode($user, true);
+            $id = DB::table('users')->insertgetId([
+                'username' => $info['username'],
+                'nickname' => $info['nickname'],
+                'password' => sha1($info['password']),
+                'email' => $info['email'],
+            ]);
+
+            if($id > 0) {
+                Session::put('username', $info['username']);
+                Session::put('privilege', -1);
+                Session::put('user_id', $id);
+                Redis::del('regToken:'.$token);
+            }
+        }
+
+        return view('register');
 
     }
 

@@ -83,8 +83,7 @@
             })
 
             $("#uploadFile").AjaxFileUpload({
-                arg:delimiter,
-                action: "{{ URL('admin/user/upload_user?_token='.csrf_token()) }}",
+                action: "{{ URL('admin/user/upload_user?_token='.csrf_token()) }}&arg="+delimiter,
                 onComplete: function(filename, response) {
                     var str = response.replace(/<pre>/, '');
                     str = str.replace(/<\/pre>/, '');

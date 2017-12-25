@@ -347,10 +347,8 @@
                 $("#passwordError").show();
             else if(motto.length > 30)
                 $("#mottoError").show();
-            else if(seat.length != 0 && !(/^[0-9]+_[0-9]+$/.test(seat)))
-                $("#seatRegError").show();
-            else if(!(/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(email)))
-                $("#emailRegError").show();
+           // else if(!(/^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/.test(email)))
+           //     $("#emailRegError").show();
             else
                 $.post("{{ URL('user/update') }}", {_token:"{{ csrf_token() }}", nickname:nickname, motto:motto, qq:qq, seat:seat, email:email, group:group, password:password, password2:password2}, function(arr){
                     if (arr.status == true) {

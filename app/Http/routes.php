@@ -22,10 +22,16 @@
 */
 
 
-
+Route::any('OJ/test', 'IndexController@test');
 
 Route::group(['middleware' => ['web'], 'prefix' => 'OJ'], function () {
 
+    Route::get('login','IndexController@login');
+    Route::get('activate', 'UserController@do_register');
+
+    Route::post('user/findPass', 'UserController@findPass');
+
+    Route::get('user/resetPass', 'UserController@resetPass');
     Route::get('/index', 'IndexController@index');
     Route::post('user/uploadHeader', 'UserController@upload');
     Route::get('problem/page/{page?}', 'ProblemController@page');

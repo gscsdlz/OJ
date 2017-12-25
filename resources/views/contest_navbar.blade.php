@@ -76,6 +76,7 @@
                                    name="password" placeholder="请输入密码">
                         </div>
                     </div>
+                    @if(config('web.vcode') == true)
                     <div class="form-group">
                         <label for="inputPassword" class="col-sm-2 control-label">验证码</label>
                         <div class="col-sm-8" id="loginOption">
@@ -88,6 +89,7 @@
                         <label id="lvcodeEmptyError" class="control-label text-danger">答案不能为空</label>
                         <label id="lvcodeError" class="control-label text-danger">答案错误</label>
                     </div>
+                    @endif
                 </form>
             </div>
             <div class="modal-footer">
@@ -193,6 +195,7 @@
         $("#lvcodeError").hide();
         var username = $("#inputUsername").val();
         var password = $("#inputPassword").val();
+        @if(config('web.vcode') == true)
         var vcode = $("input:radio[name='loginVCode']:checked").val() ;
         if(vcode.length == 0)
             $("#lvcodeEmptyError").show();
@@ -218,6 +221,28 @@
                     $("#findPass").show();
                 }
             })
+        @else
+        $.post("{{ URL('user/login') }}", {
+            username : username,
+            password : password,
+            _token:"{{ csrf_token() }}",
+        }, function(data) {
+            var arr = eval(data);
+            if (arr['status'] == false && arr['info'] == 'error vcode') {
+                $("#lvcodeError").show();
+                refresh_vcode();
+
+            } else if(arr['status'] == true){
+                window.location.reload();
+            } else {
+                refresh_vcode();
+                $("#inputUsername").val("");
+                $("#inputPassword").val("");
+                $("#loginError").show();
+                $("#findPass").show();
+            }
+        })
+        @endif
     }
     @endif
     $(document).ready(function() {

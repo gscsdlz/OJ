@@ -1,5 +1,5 @@
 @extends('layout')
-@section('title'){{ $pro->pro_title }}@endsection
+@section('title')@if(isset($pro)){{ $pro->pro_title }}@else 暂无任何题目@endif @endsection
 @section('main')
 <nav class="col-md-3" style="">
     <ul class="list-group">

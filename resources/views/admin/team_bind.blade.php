@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('title')
+    小组编辑
 @endsection
 @section('main')
     <hr>
