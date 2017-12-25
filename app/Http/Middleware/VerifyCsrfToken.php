@@ -13,5 +13,6 @@ class VerifyCsrfToken extends BaseVerifier
      */
     protected $except = [
         'OJ/user/uploadHeader',
+        'OJ/admin/user/do_import',
     ];
 }
