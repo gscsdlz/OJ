@@ -110,7 +110,7 @@
                             $("#findPass").show();
                         }
                     } else {
-                        window.location.reload();
+                        window.history.go(-1);
                     }
                 })
             }
