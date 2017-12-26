@@ -45,4 +45,9 @@ return [
     'ProblemPageMax' => '100',
     'StatusPageMax' =>' 20',
     'vcode' => false,
+    //QQ互联配置信息
+    'QQ_APPID' => env('QQ_APPID', ''),
+    'QQ_REDIRECT_URL' => env('QQ_REDIRECT_URL', ''),
+    'QQ_APPKEY' => env('QQ_APPKEY', ''),
+
 ];

@@ -10,6 +10,7 @@ namespace App\Http\Controllers;
 
 
 use App\Model\ContestModel;
+use App\Model\QQOAuthModel;
 use App\Model\StatusModel;
 use App\Model\TeamModel;
 use App\Model\UserModel;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -236,7 +238,7 @@ class UserController extends Controller
                 $path = $request->file->path();
                 $nname = $uid.time().'.'.$extension;
                 $status = move_uploaded_file($path, './image/header/'.$nname);
-                if(strpos($user->headerpath, 'default') === false) {
+                if(strpos($user->headerpath, 'default') === false && strpos($user->headerpath, 'https') === false) {
                     unlink('./image/header/' . $user->headerpath);
                 }
                 UserModel::where('user_id', $uid)->update(['headerPath' => $nname]);
@@ -349,5 +351,117 @@ class UserController extends Controller
 
         return response()->json(['addr' => $addr]);
 
+    }
+
+    /**
+     * User: Daemon
+     * Time: 2017年12月26日
+     * QQ OAuth登录
+     * @param $request
+     * @return class
+     */
+    public function qqLogin(Request $request)
+    {
+        $code = $request->get('code', null);
+        if(is_null($code)) {
+            Session::put('state', md5(uniqid(rand(), TRUE)));
+            return response()->redirectTo("https://graph.qq.com/oauth2.0/authorize?response_type=code&client_id=" . config('web.QQ_APPID') . "&redirect_uri=" . urlencode(config('web.QQ_REDIRECT_URL')) . "&state=".Session::get('state')."&scope=get_user_info");
+        } else {
+
+            if($request->get('state') == Session::get('state')) {
+                $token_url = "https://graph.qq.com/oauth2.0/token?grant_type=authorization_code&client_id=" . config('web.QQ_APPID') . "&client_secret=" . config('web.QQ_APPKEY') . "&code=" . $code . "&redirect_uri=" . urlencode(config('web.QQ_REDIRECT_URL'));
+                $res = file_get_contents($token_url);
+
+                if(strpos($res, 'callback') === false) {
+                    $arg = explode("&", $res);
+                    $info = [];
+                    foreach ($arg as $a) {
+                        $tmp = explode("=", $a);
+                        $info[$tmp[0]] = $tmp[1];
+                    }
+                    $openid_url = "https://graph.qq.com/oauth2.0/me?access_token=".$info['access_token'];
+                    $res = file_get_contents($openid_url);
+                    $openid = substr($res, strpos($res, "openid") + 9, 32);
+
+                    $user = QQOAuthModel::select('user_id')->where('openid', $openid)->first();
+                    if(is_null($user)) {//发起注册或者绑定
+                        $info_url = "https://graph.qq.com/user/get_user_info?access_token=".$info['access_token']."&oauth_consumer_key=".config('web.QQ_APPID')."&openid=".$openid;
+                        $res = file_get_contents($info_url);
+                        $res = json_decode($res, true);
+                        Session::put('openid', $openid);
+
+                        if(isset($res['figureurl_qq_2']) && strlen($res['figureurl_qq_2']) > 0)
+                            Session::put('imgPath', $res['figureurl_qq_2']);
+                        else
+                            Session::put('imgPath', $res['figureurl_qq_1']);
+
+                        return view('oauth_bind', [
+                            'user' => $res,
+                        ]);
+                    } else {
+                        $res = UserModel::select('username', 'privilege')->where('user_id', $user->user_id)->first();
+                        Session::put('username', $res->username);
+                        Session::put('privilege', $res->privilege);
+                        Session::put('user_id', $user->user_id);
+                        return response()->redirectTo('/index');
+                    }
+                }
+            }
+            return view('oauth_bind', [
+                'user' => ['msg' => '会话失败，请重试']
+            ]);
+        }
+    }
+
+    public function qq_bind(Request $request)
+    {
+        if(Session::has('openid')) {
+            $username = $request->get('username');
+            $password = $request->get('password');
+            $nickname = $request->get('nickname');
+            $openid = Session::get('openid');
+            $user = UserModel::select('user_id', 'password', 'privilege','username')->where('username', $username)->first();
+            if(is_null($user)) {
+                if(preg_match('/^[A-Za-z0-9_]+$/', $username) == 0)
+                    return response()->json(['status' => false, 'info' => '用户名不符合规则']);
+
+                $tmp = file_get_contents(Session::get('imgPath'));
+                $path = time() . rand(10000, 99999).".png";
+                Storage::put('image/header/'.$path, $tmp);
+
+                $id = DB::table('users')->insertgetId([
+                    'username' => $username,
+                    'nickname' => $nickname,
+                    'password' => sha1($password),
+                    'headerpath' => $path
+                ]);
+                DB::table('qq_oauth')->insert([
+                    'user_id' => $id,
+                    'openid' => $openid,
+                ]);
+
+                Session::put('username', $username);
+                Session::put('privilege', -1);
+                Session::put('user_id', $id);
+
+                return response()->json(['status' => true]);
+            } else {
+                if(sha1($password) != $user->password)
+                    return response()->json(['status' => false, 'info' => '密码错误']);
+                else {
+                    DB::table('qq_oauth')->insert([
+                        'user_id' => $user->user_id,
+                        'openid' => $openid,
+                    ]);
+
+                    Session::put('username', $user->username);
+                    Session::put('privilege', $user->privilege);
+                    Session::put('user_id', $user->user_id);
+                    return response()->json(['status' => true]);
+                }
+            }
+        } else {
+            return response()->json(['status' => false, 'info' => '校验失败，请重新登录']);
+        }
     }
 }

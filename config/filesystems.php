@@ -45,7 +45,7 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => '/var/www/html/laravel/public',
+            'root' => '/var/www/html/NOJ/public',
         ],
 
         'public' => [

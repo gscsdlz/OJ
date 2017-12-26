@@ -30,10 +30,14 @@
                             <label for="password">密码</label>
                             <input type="password" class="form-control" id="password" placeholder="请输入密码">
                         </div>
+                        <div class="form-group text-left">
+                            <img style="cursor: pointer" onclick="window.location.href='{{ URL('login/qq') }}'" src="{{ URL('image/qq.png') }}" />
+                        </div>
                     </form>
                     </div>
                     <div class="panel-footer text-right">
                         <span class="text-danger" style="float: left" id="loginInfo"></span>
+
                         <button type="button" class="btn btn-primary" id="login">登录</button>
                         <button type="button" class="btn btn-danger" id="findPass">免密登录</button>
                     </div>

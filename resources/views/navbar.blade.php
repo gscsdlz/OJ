@@ -7,7 +7,7 @@
                         class="icon-bar"></span> <span class="icon-bar"></span> <span
                         class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">Welcome to NUC Online Judge <span class="text-danger">系统更新中</span></a>
+            <a class="navbar-brand" href="#">Welcome to NUC Online Judge</a>
         </div>
         <div class="collapse navbar-collapse"
              id="bs-example-navbar-collapse-1">
