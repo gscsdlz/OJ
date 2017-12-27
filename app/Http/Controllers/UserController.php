@@ -183,7 +183,7 @@ class UserController extends Controller
     {
         $uid = Session::get('user_id');
 
-        $email = $request->get('email'); //邮箱可能需要后期配合邮件服务器一起
+        $email = $request->get('email', null); //邮箱可能需要后期配合邮件服务器一起
         $qq = $request->get('qq');
         $motto = $request->get('motto');
 
@@ -209,9 +209,19 @@ class UserController extends Controller
                 ]);
             }  //检查私有小组问题
 
-        }
 
-        UserModel::where('user_id', $uid)->update(['qq' => $qq, 'motto' => $motto, 'email' => $email]);
+
+        }
+        if(strlen($email) == 0)
+            $email = null;
+        $count = UserModel::where([['email', $email], ['user_id', '!=', $uid]])->count();
+        if($count == 1)
+            return response()->json(['status' => false,'info' => 'emailError']);
+        else
+            UserModel::where('user_id', $uid)->update(['email' => $email]);
+
+
+        UserModel::where('user_id', $uid)->update(['qq' => $qq, 'motto' => $motto]);
 
 
         if($pass1 != '' && $pass1 == $pass2) {

@@ -353,8 +353,10 @@
                 $.post("{{ URL('user/update') }}", {_token:"{{ csrf_token() }}", nickname:nickname, motto:motto, qq:qq, seat:seat, email:email, group:group, password:password, password2:password2}, function(arr){
                     if (arr.status == true) {
                         window.location.reload();
-                    } else if(arr.info == 'passError'){
+                    } else if(arr.info == 'passError') {
                         $("#passwordError").show();
+                    } else if(arr.info == 'emailError'){
+                            $("#emailError").show();
                     } else {
                         $("#updateError").show();
                     }
