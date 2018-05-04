@@ -328,7 +328,7 @@ class Uploader
     {
         $fullname = $this->fullName;
         //$rootPath = $_SERVER['DOCUMENT_ROOT'];
-        $rootPath = $_SERVER['DOCUMENT_ROOT'].'/laravel/public';
+        $rootPath = $_SERVER['DOCUMENT_ROOT'].'/NOJ/public';
 
         if (substr($fullname, 0, 1) != '/') {
             $fullname = '/' . $fullname;

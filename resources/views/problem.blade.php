@@ -6,7 +6,7 @@
 <div class="row">
     <div class="col-md-8 col-md-offset-2">
         <h1 class="text-center text-primary">{{ $pro->pro_title }}</h1>
-        <h4 class="text-center text-danger">时间限制: <span class="badge">{{ $pro->time_limit }}ms</span> 内存限制: <span class="badge">{{ $pro->memory_limit }}KB</span></h4>
+        <h4 class="text-center text-danger">时间限制: <span class="badge">C/C++ {{ $pro->time_limit }}ms; Java {{ $pro->time_limit * 2 }}ms</span> 内存限制: <span class="badge">{{ $pro->memory_limit }}KB</span></h4>
         <h4 class="text-center text-danger">通过次数: <span class="badge">{{ $pro->getACNum() }}</span> 总提交次数: <span class="badge">{{ $pro->getAllNum() }}</span></h4>
         @if($pro->getACFlag() == 1)
             <img src="{{ URL('image/ac.png') }}" width="50px" height="50px" style="float: right">

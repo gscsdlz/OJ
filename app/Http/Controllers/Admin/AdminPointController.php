@@ -11,7 +11,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Model\PointModel;
-use App\Model\PointProblemModel;
+use App\Model\PointProblem;
 use Illuminate\Http\Request;
 
 class AdminPointController extends Controller
@@ -43,7 +43,7 @@ class AdminPointController extends Controller
     {
         $pid = $request->get('pid');
         PointModel::destroy($pid);
-        PointProblemModel::where('point_id', $pid)->delete();
+        PointProblem::where('point_id', $pid)->delete();
         return response()->json(['status' => true]);
     }
 

@@ -12,11 +12,13 @@
                 <th>来源</th>
             </tr>
             @foreach($pros as $row)
+                @if($row->visible == 1)
                 <tr>
                     <td>{{ $row->pro_id }}</td>
                     <td align="left"><a href="{{ URL('problem/show/'.$row->pro_id) }}">{{ $row->pro_title }}</a></td>
                     <td>{{ $row->author }}</td>
                 </tr>
+                @endif
             @endforeach
         </table>
     </div>

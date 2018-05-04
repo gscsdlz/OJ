@@ -420,4 +420,89 @@ class ContestController extends Controller
             'infos' => $infos->toArray()]
         );
     }
+
+    /**
+     * 导出比赛排名数据
+     * @param Request $request
+     */
+    public function exportResult(Request $request, $cid)
+    {
+        $tmp = Redis::get('contest_rank_cache:'.$cid);
+        $ttl = null;
+        if(is_null($tmp)) {
+
+            $cranks = [];
+            $this->get_all_status($cid, $cranks);
+            $contest = ContestModel::where('contest_id', $cid)->first();
+            $inner_ids = ContestProblemModel::select('inner_id')->where('contest_id', $cid)->orderBy('inner_id')->get();
+
+            if ($contest->oi == 1)
+                $tmp = $this->sort_with_oi($contest->c_stime, $cranks);
+            else
+                $tmp = $this->sort_without_oi($contest->c_stime, $inner_ids, $cranks);
+            Redis::set('contest_rank_cache:' . $cid, json_encode($tmp));
+            Redis::expire('contest_rank_cache:' . $cid, 100);
+        } else {
+
+            $contest = ContestModel::where('contest_id', $cid)->first();
+            $inner_ids = ContestProblemModel::select('inner_id')->where('contest_id', $cid)->orderBy('inner_id')->get();
+            $tmp = json_decode($tmp, true);
+            $ttl = Redis::ttl('contest_rank_cache:'.$cid);
+        }
+        $excel = new \PHPExcel();
+        $excel->getProperties()
+            ->setCreator("NUC Online Judge")
+            ->setTitle("CONTEST RANK")
+            ->setSubject("CONTEST RANK");
+
+        $sheet = $excel->setActiveSheetIndex(0);
+
+        $sheet->setCellValue("A1", $contest->contest_name. '比赛排名')
+            ->setCellValue("A2", "排名")
+            ->setCellValue("B2", "用户名")
+            ->setCellValue("C2", "昵称")
+            ->setCellValue("D2", "所在小组")
+            ->setCellValue("E2", "通过题目数");
+
+        $i = 0;
+        foreach ($inner_ids as $row) {
+            $coordiante = chr(ord("F") + $i)."2";
+            $sheet->setCellValue($coordiante, $row->inner_id);
+            $i++;
+        }
+        $sheet->mergeCells("A1:P1");
+
+        $i = 3;
+
+        foreach ($tmp as $row) {
+            $sheet->setCellValue("A" . $i, $i-2)
+                ->setCellValue("B" . $i, $row[2])
+                ->setCellValue("C" . $i, $row[4])
+                ->setCellValue("D" . $i, $row[3])
+                ->setCellValue("E" . $i, $row[1]);
+
+            $k = 0;
+            foreach ($inner_ids as $c) {
+                $cel = $c->inner_id;
+                $coordiante = chr(ord("F") + $k).$i;
+
+                if (isset($row[$cel])) {
+                   if ($row[$cel][0])
+                        $sheet->setCellValue($coordiante, "√");
+                    else
+                        $sheet->setCellValue($coordiante, "×");
+                } else {
+                    $sheet->setCellValue($coordiante, "-");
+                }
+                $k++;
+            }
+            $i++;
+        }
+
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="比赛排名表.xls"');
+        header('Cache-Control: max-age=0');
+        $objWriter = \PHPExcel_IOFactory::createWriter($excel, 'Excel5');
+        $objWriter->save('php://output');
+    }
 }

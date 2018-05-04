@@ -158,10 +158,11 @@ class ProblemController extends Controller
     public function search(Request $request)
     {
         $key = $request->get('key');
-        $pros = ProblemModel::select('pro_id', 'pro_title', 'author')->where('pro_id', $key)
+        $pros = ProblemModel::select('pro_id', 'pro_title', 'author', 'visible')->where('pro_id', $key)
             ->orWhere('pro_title', 'like', '%'.$key.'%')
             ->orWhere('author', 'like', '%'.$key.'%')->limit(100)->get();
         $request->flashOnly(['key', $key]);
+
         return view('pro_search',[
             'menu' => 'problem',
             'pros' => $pros

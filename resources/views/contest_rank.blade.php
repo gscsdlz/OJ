@@ -24,9 +24,9 @@
                 <div class="form-group">
                     <button id="filter" type="button" class="btn btn-primary">筛选</button>
                 </div>
-                <!--<div class="form-group">
-                    <button id="export" type="button" class="btn btn-success " onclick="window.location.href='/Src/File/contest_rankList{#$contest#}.csv'">导出CSV数据</button>
-                </div>-->
+                <div class="form-group">
+                    <button id="export" type="button" class="btn btn-success " onclick="window.location.href='{{ URL('contest/export/'.$contest->contest_id) }}'">导出数据</button>
+                </div>
                 @if(!is_null($ttl))
                     <br /><label class="text-danger">数据来自缓存，每5分钟更新一次, 请勿频繁刷新 下次更新还有{{  $ttl }}s</label>
                 @endif

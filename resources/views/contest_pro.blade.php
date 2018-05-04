@@ -47,7 +47,7 @@
     <div class="col-md-8">
     @if(isset($pro))
         <h1 class="text-center text-primary">{{ $pro->pro_title }}</h1>
-        <h4 class="text-center text-danger">时间限制: {{ $pro->time_limit }}ms 内存限制: {{ $pro->memory_limit }}KB</h4>
+        <h4 class="text-center text-danger">时间限制: C/C++ {{ $pro->time_limit }}ms; Java {{ $pro->time_limit * 2 }}ms 内存限制: {{ $pro->memory_limit }}KB</h4>
         <h4 class="text-center text-danger">通过次数: <span class="badge">{{ $pro->getACNum() }}</span>
             总提交次数: <span class="badge">{{ $pro->getAllNum() }}</span></h4>
         @if($pro->getACFlag() == 1)

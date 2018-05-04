@@ -172,6 +172,7 @@ class AdminUserController extends Controller
 
         $teamArr = [];
         foreach($data as $row) {
+         //   var_dump($row);
             $teamArr[$row[3]] = 1;
         }
         foreach($teamArr as $key => $val) {

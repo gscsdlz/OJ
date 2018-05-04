@@ -22,10 +22,9 @@
 */
 
 
-Route::any('OJ/test', 'IndexController@test');
+
 
 Route::group(['middleware' => ['web'], 'prefix' => 'OJ'], function () {
-
     Route::get('login/qq', 'UserController@qqLogin');
     Route::get('qq_login', 'UserController@qqLogin');
     Route::get('login','IndexController@login');
@@ -67,15 +66,22 @@ Route::group(['middleware' => ['web'], 'prefix' => 'OJ'], function () {
     Route::post('contest/add_question', 'ContestController@add_question');
     Route::post('contest/add_answer', 'ContestController@add_answer');
     Route::post('contest/del_answer', 'ContestController@del_answer');
+    Route::get('contest/export/{cid}', 'ContestController@exportResult');
 
     Route::post('submit', 'CodeController@submit');
     Route::post('contest/get_URG_info', 'ContestController@get_URG_info')->where(['cid' => '[0-9]+']);
     Route::post('contest/get_answer', 'ContestController@get_answer');
     Route::post('user/update', 'UserController@update');
+
+    Route::get('check', 'IndexController@rand');
+    Route::get('award', 'IndexController@award');
+    Route::post('award/add', 'IndexController@awardAdd');
+    Route::get('award/getAward', 'IndexController@getAll');
+    Route::get('award/getOne', 'IndexController@randGet');
 });
 
 Route::group(['middleware' => ['admin'], 'prefix' => 'OJ/admin'], function(){
-    Route::get('/', 'Admin\AdminIndexController@index');
+    Route::get('/index', 'Admin\AdminIndexController@index');
     Route::get('/problem/add/{pid?}', 'Admin\AdminProblemController@add');
     Route::get('/problem/list/{page?}', 'Admin\AdminProblemController@lists')->where(['page' => '[0-9]*']);
     Route::post('problem/do_visible','Admin\AdminProblemController@do_visible');
@@ -116,6 +122,5 @@ Route::group(['middleware' => ['admin'], 'prefix' => 'OJ/admin'], function(){
     Route::post('file/undo', 'Admin\AdminProblemController@undo');
     Route::post('file/upload/{pid}', 'Admin\AdminProblemController@upload');
 });
-
 
 

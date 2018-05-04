@@ -34,7 +34,7 @@
                     <ul class="dropdown-menu" role="menu">
                         <li><a href="{{ URL("/user/show/".Session::get('username')) }}">个人中心</a></li>
                         @if(Session::get('privilege') == 1)
-                            <li><a href="{{ URL('admin/') }}">后台管理</a></li>
+                            <li><a href="{{ URL('admin/index') }}">后台管理</a></li>
                         @endif
                         <li class="divider"></li>
                         <li id="logout"><a href="#">退出登录</a></li>
